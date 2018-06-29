@@ -20,7 +20,7 @@ dependencies {
     compile name: 'commons-csv-20070730'
 
 }
-mainClassName="Login"
+mainClassName="ScoreMIS"//"Login"
 //set the main class from the command line property 'mainClass' (e.g. gradle -PmainClass=Chapter02)
 def chapterPrefix = 'Chapter0'
 def defaultChapter = '1'
