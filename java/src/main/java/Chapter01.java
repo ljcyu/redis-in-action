@@ -145,7 +145,7 @@ public class Chapter01 {
       ZParams params = new ZParams().aggregate(ZParams.Aggregate.MAX);
       //求交集， 是一个无序set,没有score这个项呀?redis就默认它等于1
       conn.zinterstore(key, params, "group:" + group, order);
-      conn.expire(key, 60);//存在很段时间，就过期，然后就被删除
+      conn.expire(key, 10*60);//存在很短时间，就过期，然后就被删除
     }
     return getArticles(conn, page, key);
   }
