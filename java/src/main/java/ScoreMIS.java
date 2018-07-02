@@ -12,10 +12,18 @@ public class ScoreMIS {
     //testJSonObj();
     Jedis redis = new Jedis("localhost");
     initStus(redis);
-    dispAvgDesc(redis);
+    //dispAvgDesc(redis);
+    findByName2(redis);
   }
+  /**准备一个stu:username,存username=stu:id*/
+  private static void findByName2(Jedis redis){
+    out.println("查找zhangsan 5");
+    String stuKey=redis.hget("stu:username","zhangsan 5");
+    Map<String,String> stuData=redis.hgetAll(stuKey);
+    out.println(stuData);
+  }
+  /**怎么实现按姓名查找?觉得这种方式非常不好，遍历*/
   private static void findByName(Jedis redis){
-    //怎么实现按姓名查找?觉得这种方式非常不好
     long num=Long.parseLong(redis.get("stu:"));
     for(int i=0;i<num;i++){
       String val=redis.hget("stu:"+(i+1),"java");
@@ -52,10 +60,13 @@ public class ScoreMIS {
   private static void initStus(Jedis redis){
     for(int i=0;i<10;i++) {
       long id=redis.incr("stu:");
-      Stu stu = new Stu(id, "zhangsan", 80+i, 80+i, 80+i);
-      redis.hmset("stu:"+id,toMap(stu));
+      String username="zhangsan "+i;
+      Stu stu = new Stu(id, username, 80+i, 80+i, 80+i);
+      String stuKey="stu:"+id;
+      redis.hmset(stuKey,toMap(stu));
       //平均成绩单独的表
       redis.zadd("score:avg",80+i,"stu:"+id);
+      redis.hset("stu:username",username,stuKey);
     }
   }
   private static Map<String,String> toMap(Stu stu){
