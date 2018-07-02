@@ -18,9 +18,11 @@ public class ScoreMIS {
   /**准备一个stu:username,存username=stu:id*/
   private static void findByName2(Jedis redis){
     out.println("查找zhangsan 5");
-    String stuKey=redis.hget("stu:username","zhangsan 5");
-    Map<String,String> stuData=redis.hgetAll(stuKey);
-    out.println(stuData);
+    String stuKeys=redis.hget("stu:username","zhangsan 5");
+    for(String stuKey:stuKeys.split(",")) {
+      Map<String, String> stuData = redis.hgetAll(stuKey);
+      out.println(stuData);
+    }
   }
   /**怎么实现按姓名查找?觉得这种方式非常不好，遍历*/
   private static void findByName(Jedis redis){
@@ -66,7 +68,13 @@ public class ScoreMIS {
       redis.hmset(stuKey,toMap(stu));
       //平均成绩单独的表
       redis.zadd("score:avg",80+i,"stu:"+id);
-      redis.hset("stu:username",username,stuKey);
+      //有重名时
+      if(redis.hexists("stu:username",username)){
+        String oldKeys=redis.hget("stu:username",username);
+        redis.hset("stu:username",username,oldKeys+","+stuKey);
+      }else{//假设没有重名
+        redis.hset("stu:username",username,stuKey);
+      }
     }
   }
   private static Map<String,String> toMap(Stu stu){
