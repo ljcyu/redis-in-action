@@ -19,6 +19,7 @@ public class Chapter01 {
     String articleId = postArticle(conn, "username", "A title", "http://www.google.com");
     System.out.println("We posted a new article with id: " + articleId);
     System.out.println("Its HASH looks like:");
+    //得到article:id hash中存的所有键值对
     Map<String, String> articleData = conn.hgetAll("article:" + articleId);
     for (Map.Entry<String, String> entry : articleData.entrySet()) {
       System.out.println("  " + entry.getKey() + ": " + entry.getValue());
@@ -43,15 +44,17 @@ public class Chapter01 {
     assert articles.size() >= 1;
   }
 
+
   public String postArticle(Jedis conn, String user, String title, String link) {
-    //取一个值，第一次还不存在，会创建并返回1
+    //取一个值，第一次还不存在，会创建并返回1，相当于一个序列
     String articleId = String.valueOf(conn.incr("article:"));
 
-    //创建一个投票的set,每篇文章一个，里边就投票的用户
+    //创建一个投票的set,每篇文章一个set，里边就投票的用户
     String votedKey = "voted:" + articleId;
     conn.sadd(votedKey, user);
     conn.expire(votedKey, ONE_WEEK_IN_SECONDS);
 
+    //保存具体信息在article:id对应的hash中
     long now = System.currentTimeMillis() / 1000;
     String articleKey = "article:" + articleId;
     HashMap<String, String> articleData = new HashMap<String, String>();
@@ -67,7 +70,17 @@ public class Chapter01 {
 
     return articleId;
   }
+  /**自己实现*/
+  private void articleVoteSelf(Jedis redis,String user,String articleKey){
+    //是否投过票 voted:id
+    String id=articleKey.split(":")[1];
+    if(redis.sadd("voteds:"+id,user)==1) {
+        //articleKey对应的hash总votes+1
+        redis.hincrBy(articleKey, "votes", 1);
+    }
 
+
+  }
   public void articleVote(Jedis conn, String user, String articleKey) {
     long cutoff = (System.currentTimeMillis() / 1000) - ONE_WEEK_IN_SECONDS;
     if (conn.zscore("time:", articleKey) < cutoff) {
@@ -76,9 +89,9 @@ public class Chapter01 {
 
     String articleId = articleKey.substring(articleKey.indexOf(':') + 1);
     //以前该用户没有投过
-    if (conn.sadd("voted:" + articleId, user) == 1) {
-      conn.zincrby("score:", VOTE_SCORE, articleKey);
-      conn.hincrBy(articleKey, "votes", 1);
+    if (conn.sadd("voted:" + articleId, user) == 1) {//记录投票用户
+      conn.zincrby("score:", VOTE_SCORE, articleKey);//在score:中记录改文章分数
+      conn.hincrBy(articleKey, "votes", 1);//在article:id中hash中增加votes值
     }
   }
 
@@ -86,19 +99,32 @@ public class Chapter01 {
   public List<Map<String, String>> getArticles(Jedis conn, int page) {
     return getArticles(conn, page, "score:");
   }
+  public List<Map<String,String>> getArticlesBySelf(Jedis redis,int page,String order){
+    int start=(page-1)*ARTICLES_PER_PAGE;
+    int end=page*ARTICLES_PER_PAGE-1;
+    Set<String> articleKeys=redis.zrevrange(order,start,end);
+    List<Map<String,String>> articleDatas=new ArrayList<>();
+    for(String articleKey:articleKeys){
+      Map<String,String> articleData=redis.hgetAll(articleKey);
+      articleData.put("id",articleKey);
+      articleDatas.add(articleData);
+    }
+    return articleDatas;
+  }
 
   public List<Map<String, String>> getArticles(Jedis conn, int page, String order) {
     int start = (page - 1) * ARTICLES_PER_PAGE;
     int end = start + ARTICLES_PER_PAGE - 1;
 
-    Set<String> ids = conn.zrevrange(order, start, end);
-    List<Map<String, String>> articles = new ArrayList<Map<String, String>>();
-    for (String id : ids) {
-      Map<String, String> articleData = conn.hgetAll(id);
-      articleData.put("id", id);
+    //先得到score:表中逆序的所有article的key,也就是article:id
+    Set<String> articleKeys = conn.zrevrange(order, start, end);
+    List<Map<String, String>> articles = new ArrayList<>();
+    for (String articleKey : articleKeys) {
+      //取articleKey hash中的所有键值对
+      Map<String, String> articleData = conn.hgetAll(articleKey);
+      articleData.put("id", articleKey);
       articles.add(articleData);
     }
-
     return articles;
   }
 
@@ -115,10 +141,11 @@ public class Chapter01 {
 
   public List<Map<String, String>> getGroupArticles(Jedis conn, String group, int page, String order) {
     String key = order + group;
-    if (!conn.exists(key)) {
+    if (!conn.exists(key)) {//是否存在key对应的zset，有序集
       ZParams params = new ZParams().aggregate(ZParams.Aggregate.MAX);
+      //求交集， 是一个无序set,没有score这个项呀?redis就默认它等于1
       conn.zinterstore(key, params, "group:" + group, order);
-      conn.expire(key, 60);
+      conn.expire(key, 60);//存在很段时间，就过期，然后就被删除
     }
     return getArticles(conn, page, key);
   }
