@@ -18,10 +18,12 @@ dependencies {
     compile 'com.google.code.gson:gson:2.2.2'
 
     compile name: 'commons-csv-20070730'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.10.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.10.0'
 
 }
-//mainClassName="ScoreMIS"//"Login"
+mainClassName="Login";//"ScoreMIS"
 //set the main class from the command line property 'mainClass' (e.g. gradle -PmainClass=Chapter02)
 def chapterPrefix = 'Chapter0'
 def defaultChapter = '2'
-mainClassName = chapterPrefix + (project.hasProperty('chapter') ? chapter  : defaultChapter)
+//mainClassName = chapterPrefix + (project.hasProperty('chapter') ? chapter  : defaultChapter)

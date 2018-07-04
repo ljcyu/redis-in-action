@@ -38,7 +38,7 @@ public class Chapter02 {
 
     System.out.println("Let's drop the maximum number of cookies to 0 to clean them out");
     System.out.println("We will start a thread to do the cleaning, while we stop it later");
-    //ä¸ºä»€ä¹ˆæ˜¯0?
+    //ÎªÊ²Ã´ÊÇ0?
     CleanSessionsThread thread = new CleanSessionsThread(0);
     thread.start();
     Thread.sleep(1000);
@@ -171,16 +171,16 @@ public class Chapter02 {
 
   public void updateToken(Jedis conn, String token, String user, String item) {
     long timestamp = System.currentTimeMillis() / 1000;
-    //ç™»å½•çš„ç”¨æˆ·ï¼Œhash
+    //µÇÂ¼µÄÓÃ»§£¬hash
     conn.hset("login:", token, user);
-    //æœ€åç™»å½•æ—¶é—´,zset
+    //×îºóµÇÂ¼Ê±¼ä,zset
     conn.zadd("recent:", timestamp, token);
     if (item != null) {
-      //æµè§ˆçš„å•†å“ä¿¡æ¯ï¼Œæµè§ˆå†å²è®°å½•
+      //ä¯ÀÀµÄÉÌÆ·ĞÅÏ¢£¬ä¯ÀÀÀúÊ·¼ÇÂ¼
       conn.zadd("viewed:" + token, timestamp, item);
-      //å‰è¾¹æµè§ˆå†å²åˆ æ‰ï¼Œåªç•™æœ€æ–°çš„25ä¸ª
+      //Ç°±ßä¯ÀÀÀúÊ·É¾µô£¬Ö»Áô×îĞÂµÄ25¸ö
       conn.zremrangeByRank("viewed:" + token, 0, -26);
-      //è¿™ä¸ªè¡¨ä»€ä¹ˆç”¨ï¼Ÿ
+      //Õâ¸ö±íÊ²Ã´ÓÃ£¿
       conn.zincrby("viewed:", -1, item);
     }
   }
@@ -268,9 +268,9 @@ public class Chapter02 {
     }
 
     public void run() {
-      while (!quit) {//zsetä¸­æœ‰å‡ ä¸ªæˆå‘˜ï¼Ÿ æœ‰å‡ ä¸ªç™»å½•ç”¨æˆ·ï¼Ÿ
+      while (!quit) {//zsetÖĞÓĞ¼¸¸ö³ÉÔ±£¿ ÓĞ¼¸¸öµÇÂ¼ÓÃ»§£¿
         long size = conn.zcard("recent:");
-        if (size <= limit) {//ç™»å½•è¿‡ç”¨æˆ·å¾ˆå°‘
+        if (size <= limit) {//µÇÂ¼¹ıÓÃ»§ºÜÉÙ
           try {
             sleep(1000);
           } catch (InterruptedException ie) {
@@ -280,9 +280,9 @@ public class Chapter02 {
         }
 
         long endIndex = Math.min(size - limit, 100);
-        //è¶…è¿‡é™åˆ¶çš„ç™»å½•ç”¨æˆ·åˆ æ‰ï¼Œæœ€å‰è¾¹çš„å‡ ä¸ªåˆ æ‰
-        //login:ä¸­åªè®°å½•äº†token=useranm
-        // recent:è®°å½•äº†ç™»å½•æ—¶é—´=tokenï¼Œè€Œä¸”è¶Šæ—©çš„è¶Šåœ¨å‰è¾¹ï¼Œè¿™æ ·æŒ‰ç…§ç™»å½•æ—¶é—´åˆ é™¤
+        //³¬¹ıÏŞÖÆµÄµÇÂ¼ÓÃ»§É¾µô£¬×îÇ°±ßµÄ¼¸¸öÉ¾µô
+        //login:ÖĞÖ»¼ÇÂ¼ÁËtoken=useranm
+        // recent:¼ÇÂ¼ÁËµÇÂ¼Ê±¼ä=token£¬¶øÇÒÔ½ÔçµÄÔ½ÔÚÇ°±ß£¬ÕâÑù°´ÕÕµÇÂ¼Ê±¼äÉ¾³ı
         Set<String> tokenSet = conn.zrange("recent:", 0, endIndex - 1);
         String[] tokens = tokenSet.toArray(new String[tokenSet.size()]);
 
@@ -290,10 +290,10 @@ public class Chapter02 {
         for (String token : tokens) {
           sessionKeys.add("viewed:" + token);
         }
-        //æµè§ˆå†å²åˆ æ‰
+        //ä¯ÀÀÀúÊ·É¾µô
         conn.del(sessionKeys.toArray(new String[sessionKeys.size()]));
-        conn.hdel("login:", tokens);//ä»å·²ç™»å½•ä¸­åˆ æ‰ token=username
-        conn.zrem("recent:", tokens);//å·²ç™»å½•ä¸­åˆ æ‰ï¼Œtime=token
+        conn.hdel("login:", tokens);//´ÓÒÑµÇÂ¼ÖĞÉ¾µô token=username
+        conn.zrem("recent:", tokens);//ÒÑµÇÂ¼ÖĞÉ¾µô£¬time=token
       }
     }
   }

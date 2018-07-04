@@ -19,7 +19,7 @@ public class Chapter01 {
     String articleId = postArticle(conn, "username", "A title", "http://www.google.com");
     System.out.println("We posted a new article with id: " + articleId);
     System.out.println("Its HASH looks like:");
-    //å¾—åˆ°article:id hashä¸­å­˜çš„æ‰€æœ‰é”®å€¼å¯¹
+    //µÃµ½article:id hashÖĞ´æµÄËùÓĞ¼üÖµ¶Ô
     Map<String, String> articleData = conn.hgetAll("article:" + articleId);
     for (Map.Entry<String, String> entry : articleData.entrySet()) {
       System.out.println("  " + entry.getKey() + ": " + entry.getValue());
@@ -46,15 +46,15 @@ public class Chapter01 {
 
 
   public String postArticle(Jedis conn, String user, String title, String link) {
-    //å–ä¸€ä¸ªå€¼ï¼Œç¬¬ä¸€æ¬¡è¿˜ä¸å­˜åœ¨ï¼Œä¼šåˆ›å»ºå¹¶è¿”å›1ï¼Œç›¸å½“äºä¸€ä¸ªåºåˆ—
+    //È¡Ò»¸öÖµ£¬µÚÒ»´Î»¹²»´æÔÚ£¬»á´´½¨²¢·µ»Ø1£¬Ïàµ±ÓÚÒ»¸öĞòÁĞ
     String articleId = String.valueOf(conn.incr("article:"));
 
-    //åˆ›å»ºä¸€ä¸ªæŠ•ç¥¨çš„set,æ¯ç¯‡æ–‡ç« ä¸€ä¸ªsetï¼Œé‡Œè¾¹å°±æŠ•ç¥¨çš„ç”¨æˆ·
+    //´´½¨Ò»¸öÍ¶Æ±µÄset,Ã¿ÆªÎÄÕÂÒ»¸öset£¬Àï±ß¾ÍÍ¶Æ±µÄÓÃ»§
     String votedKey = "voted:" + articleId;
     conn.sadd(votedKey, user);
     conn.expire(votedKey, ONE_WEEK_IN_SECONDS);
 
-    //ä¿å­˜å…·ä½“ä¿¡æ¯åœ¨article:idå¯¹åº”çš„hashä¸­
+    //±£´æ¾ßÌåĞÅÏ¢ÔÚarticle:id¶ÔÓ¦µÄhashÖĞ
     long now = System.currentTimeMillis() / 1000;
     String articleKey = "article:" + articleId;
     HashMap<String, String> articleData = new HashMap<String, String>();
@@ -64,18 +64,18 @@ public class Chapter01 {
     articleData.put("now", String.valueOf(now));
     articleData.put("votes", "1");
     conn.hmset(articleKey, articleData);
-    //ä¸¤ä¸ªzset
+    //Á½¸özset
     conn.zadd("score:", now + VOTE_SCORE, articleKey);
     conn.zadd("time:", now, articleKey);
 
     return articleId;
   }
-  /**è‡ªå·±å®ç°*/
+  /**×Ô¼ºÊµÏÖ*/
   private void articleVoteSelf(Jedis redis,String user,String articleKey){
-    //æ˜¯å¦æŠ•è¿‡ç¥¨ voted:id
+    //ÊÇ·ñÍ¶¹ıÆ± voted:id
     String id=articleKey.split(":")[1];
     if(redis.sadd("voteds:"+id,user)==1) {
-        //articleKeyå¯¹åº”çš„hashæ€»votes+1
+        //articleKey¶ÔÓ¦µÄhash×Üvotes+1
         redis.hincrBy(articleKey, "votes", 1);
     }
 
@@ -88,10 +88,10 @@ public class Chapter01 {
     }
 
     String articleId = articleKey.substring(articleKey.indexOf(':') + 1);
-    //ä»¥å‰è¯¥ç”¨æˆ·æ²¡æœ‰æŠ•è¿‡
-    if (conn.sadd("voted:" + articleId, user) == 1) {//è®°å½•æŠ•ç¥¨ç”¨æˆ·
-      conn.zincrby("score:", VOTE_SCORE, articleKey);//åœ¨score:ä¸­è®°å½•æ”¹æ–‡ç« åˆ†æ•°
-      conn.hincrBy(articleKey, "votes", 1);//åœ¨article:idä¸­hashä¸­å¢åŠ voteså€¼
+    //ÒÔÇ°¸ÃÓÃ»§Ã»ÓĞÍ¶¹ı
+    if (conn.sadd("voted:" + articleId, user) == 1) {//¼ÇÂ¼Í¶Æ±ÓÃ»§
+      conn.zincrby("score:", VOTE_SCORE, articleKey);//ÔÚscore:ÖĞ¼ÇÂ¼¸ÄÎÄÕÂ·ÖÊı
+      conn.hincrBy(articleKey, "votes", 1);//ÔÚarticle:idÖĞhashÖĞÔö¼ÓvotesÖµ
     }
   }
 
@@ -116,11 +116,11 @@ public class Chapter01 {
     int start = (page - 1) * ARTICLES_PER_PAGE;
     int end = start + ARTICLES_PER_PAGE - 1;
 
-    //å…ˆå¾—åˆ°score:è¡¨ä¸­é€†åºçš„æ‰€æœ‰articleçš„key,ä¹Ÿå°±æ˜¯article:id
+    //ÏÈµÃµ½score:±íÖĞÄæĞòµÄËùÓĞarticleµÄkey,Ò²¾ÍÊÇarticle:id
     Set<String> articleKeys = conn.zrevrange(order, start, end);
     List<Map<String, String>> articles = new ArrayList<>();
     for (String articleKey : articleKeys) {
-      //å–articleKey hashä¸­çš„æ‰€æœ‰é”®å€¼å¯¹
+      //È¡articleKey hashÖĞµÄËùÓĞ¼üÖµ¶Ô
       Map<String, String> articleData = conn.hgetAll(articleKey);
       articleData.put("id", articleKey);
       articles.add(articleData);
@@ -141,11 +141,11 @@ public class Chapter01 {
 
   public List<Map<String, String>> getGroupArticles(Jedis conn, String group, int page, String order) {
     String key = order + group;
-    if (!conn.exists(key)) {//æ˜¯å¦å­˜åœ¨keyå¯¹åº”çš„zsetï¼Œæœ‰åºé›†
+    if (!conn.exists(key)) {//ÊÇ·ñ´æÔÚkey¶ÔÓ¦µÄzset£¬ÓĞĞò¼¯
       ZParams params = new ZParams().aggregate(ZParams.Aggregate.MAX);
-      //æ±‚äº¤é›†ï¼Œ æ˜¯ä¸€ä¸ªæ— åºset,æ²¡æœ‰scoreè¿™ä¸ªé¡¹å‘€?rediså°±é»˜è®¤å®ƒç­‰äº1
+      //Çó½»¼¯£¬ ÊÇÒ»¸öÎŞĞòset,Ã»ÓĞscoreÕâ¸öÏîÑ½?redis¾ÍÄ¬ÈÏËüµÈÓÚ1
       conn.zinterstore(key, params, "group:" + group, order);
-      conn.expire(key, 10*60);//å­˜åœ¨å¾ˆçŸ­æ—¶é—´ï¼Œå°±è¿‡æœŸï¼Œç„¶åå°±è¢«åˆ é™¤
+      conn.expire(key, 10*60);//´æÔÚºÜ¶ÌÊ±¼ä£¬¾Í¹ıÆÚ£¬È»ºó¾Í±»É¾³ı
     }
     return getArticles(conn, page, key);
   }
