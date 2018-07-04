@@ -16,13 +16,12 @@ public class Chapter02 {
     conn.select(15);
 
     testLoginCookies(conn);
-    testShopppingCartCookies(conn);
-    testCacheRows(conn);
-    testCacheRequest(conn);
+    //testShopppingCartCookies(conn);
+    //testCacheRows(conn);
+    //testCacheRequest(conn);
   }
 
-  public void testLoginCookies(Jedis conn)
-      throws InterruptedException {
+  public void testLoginCookies(Jedis conn) throws InterruptedException {
     System.out.println("\n----- testLoginCookies -----");
     String token = UUID.randomUUID().toString();
 
@@ -39,7 +38,7 @@ public class Chapter02 {
 
     System.out.println("Let's drop the maximum number of cookies to 0 to clean them out");
     System.out.println("We will start a thread to do the cleaning, while we stop it later");
-
+    //为什么是0?
     CleanSessionsThread thread = new CleanSessionsThread(0);
     thread.start();
     Thread.sleep(1000);
@@ -172,15 +171,16 @@ public class Chapter02 {
 
   public void updateToken(Jedis conn, String token, String user, String item) {
     long timestamp = System.currentTimeMillis() / 1000;
-    //登录的用户
+    //登录的用户，hash
     conn.hset("login:", token, user);
-    //最后登录时间
+    //最后登录时间,zset
     conn.zadd("recent:", timestamp, token);
     if (item != null) {
-      //浏览的商品信息
+      //浏览的商品信息，浏览历史记录
       conn.zadd("viewed:" + token, timestamp, item);
       //前边浏览历史删掉，只留最新的25个
       conn.zremrangeByRank("viewed:" + token, 0, -26);
+      //这个表什么用？
       conn.zincrby("viewed:", -1, item);
     }
   }
@@ -252,8 +252,7 @@ public class Chapter02 {
     public String call(String request);
   }
 
-  public class CleanSessionsThread
-      extends Thread {
+  public class CleanSessionsThread extends Thread {
     private Jedis conn;
     private int limit;
     private boolean quit;
@@ -269,9 +268,9 @@ public class Chapter02 {
     }
 
     public void run() {
-      while (!quit) {
+      while (!quit) {//zset中有几个成员？ 有几个登录用户？
         long size = conn.zcard("recent:");
-        if (size <= limit) {
+        if (size <= limit) {//登录过用户很少
           try {
             sleep(1000);
           } catch (InterruptedException ie) {
@@ -281,17 +280,20 @@ public class Chapter02 {
         }
 
         long endIndex = Math.min(size - limit, 100);
+        //超过限制的登录用户删掉，最前边的几个删掉
+        //login:中只记录了token=useranm
+        // recent:记录了登录时间=token，而且越早的越在前边，这样按照登录时间删除
         Set<String> tokenSet = conn.zrange("recent:", 0, endIndex - 1);
         String[] tokens = tokenSet.toArray(new String[tokenSet.size()]);
 
-        ArrayList<String> sessionKeys = new ArrayList<String>();
+        ArrayList<String> sessionKeys = new ArrayList<>();
         for (String token : tokens) {
           sessionKeys.add("viewed:" + token);
         }
-
+        //浏览历史删掉
         conn.del(sessionKeys.toArray(new String[sessionKeys.size()]));
-        conn.hdel("login:", tokens);
-        conn.zrem("recent:", tokens);
+        conn.hdel("login:", tokens);//从已登录中删掉 token=username
+        conn.zrem("recent:", tokens);//已登录中删掉，time=token
       }
     }
   }
