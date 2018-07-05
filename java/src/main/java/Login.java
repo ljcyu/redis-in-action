@@ -21,8 +21,14 @@ public class Login {
     for(String username:usernames)    {
       String token=login(redis,username);
       view(redis,token,"ssd 120G");
-    }*/
-    checkCache(redis, 10);
+    }
+    checkCache(redis, 10);*/
+    testShop(redis);
+  }
+  private static void testShop(Jedis redis){
+    String token=login(redis,"wxj");
+    addToCart(redis,token,"hdd 3T",3);
+    addToCart(redis,token,"surface pro5",1);
   }
   private static void testIsLogin(Jedis redis){
     boolean isSuc = isLogin(redis, "ljc", "123");
@@ -79,5 +85,14 @@ public class Login {
     String[] keys = tokens.stream().map(it -> "self-viewd:" + it).collect(Collectors.toSet()).toArray(new String[0]);
     logger.debug("浏览历史:{}",Arrays.toString(keys));
     redis.del(keys);
+  }
+  private static void addToCart(Jedis redis,String token,String item,int count){
+     if(count<=0)
+       redis.hdel("cart:"+token,item);
+    else
+      redis.hset("cart:"+token,item,""+count);
+    logger.debug("--购物车--");
+    Map<String,String> goods=redis.hgetAll("cart:"+token);
+    logger.debug("{}",goods);
   }
 }

@@ -16,7 +16,7 @@ public class Chapter02 {
     conn.select(15);
 
     testLoginCookies(conn);
-    //testShopppingCartCookies(conn);
+    testShopppingCartCookies(conn);
     //testCacheRows(conn);
     //testCacheRequest(conn);
   }
@@ -53,8 +53,7 @@ public class Chapter02 {
     assert s == 0;
   }
 
-  public void testShopppingCartCookies(Jedis conn)
-      throws InterruptedException {
+  public void testShopppingCartCookies(Jedis conn) throws InterruptedException {
     System.out.println("\n----- testShopppingCartCookies -----");
     String token = UUID.randomUUID().toString();
 
@@ -184,12 +183,12 @@ public class Chapter02 {
       conn.zincrby("viewed:", -1, item);
     }
   }
-
-  public void addToCart(Jedis conn, String session, String item, int count) {
-    if (count <= 0) {
-      conn.hdel("cart:" + session, item);
-    } else {
-      conn.hset("cart:" + session, item, String.valueOf(count));
+  /**购物车*/
+  public void addToCart(Jedis conn, String token, String item, int count) {
+    if (count <= 0) { //从购物车删除
+      conn.hdel("cart:" + token, item);
+    } else {//增加到购物车
+      conn.hset("cart:" + token, item, String.valueOf(count));
     }
   }
 
@@ -298,8 +297,7 @@ public class Chapter02 {
     }
   }
 
-  public class CleanFullSessionsThread
-      extends Thread {
+  public class CleanFullSessionsThread extends Thread {
     private Jedis conn;
     private int limit;
     private boolean quit;
@@ -330,7 +328,7 @@ public class Chapter02 {
         Set<String> sessionSet = conn.zrange("recent:", 0, endIndex - 1);
         String[] sessions = sessionSet.toArray(new String[sessionSet.size()]);
 
-        ArrayList<String> sessionKeys = new ArrayList<String>();
+        ArrayList<String> sessionKeys = new ArrayList<>();
         for (String sess : sessions) {
           sessionKeys.add("viewed:" + sess);
           sessionKeys.add("cart:" + sess);
