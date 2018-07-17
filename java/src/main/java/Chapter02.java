@@ -17,7 +17,7 @@ public class Chapter02 {
 
     testLoginCookies(conn);
     testShopppingCartCookies(conn);
-    //testCacheRows(conn);
+    testCacheRows(conn);
     //testCacheRequest(conn);
   }
 
@@ -88,8 +88,7 @@ public class Chapter02 {
     assert r.size() == 0;
   }
 
-  public void testCacheRows(Jedis conn)
-      throws InterruptedException {
+  public void testCacheRows(Jedis conn) throws InterruptedException {
     System.out.println("\n----- testCacheRows -----");
     System.out.println("First, let's schedule caching of itemX every 5 seconds");
     scheduleRowCache(conn, "itemX", 5);
@@ -341,8 +340,7 @@ public class Chapter02 {
     }
   }
 
-  public class CacheRowsThread
-      extends Thread {
+  public class CacheRowsThread  extends Thread {
     private Jedis conn;
     private boolean quit;
 
@@ -358,9 +356,11 @@ public class Chapter02 {
     public void run() {
       Gson gson = new Gson();
       while (!quit) {
+        //加入的时间
         Set<Tuple> range = conn.zrangeWithScores("schedule:", 0, 0);
         Tuple next = range.size() > 0 ? range.iterator().next() : null;
         long now = System.currentTimeMillis() / 1000;
+        //没有数据，或第一个时间未到，后边的时间更不会到
         if (next == null || next.getScore() > now) {
           try {
             sleep(50);
@@ -370,9 +370,10 @@ public class Chapter02 {
           continue;
         }
 
+        //经过上边的判断，第一个满足条件，加入时间<=现在时间
         String rowId = next.getElement();
         double delay = conn.zscore("delay:", rowId);
-        if (delay <= 0) {
+        if (delay <= 0) {//是否要再次延迟？
           conn.zrem("delay:", rowId);
           conn.zrem("schedule:", rowId);
           conn.del("inv:" + rowId);
