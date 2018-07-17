@@ -22,8 +22,8 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.10.0'
 
 }
-//mainClassName="Login";//"ScoreMIS"
+mainClassName="Login";//"ScoreMIS"
 //set the main class from the command line property 'mainClass' (e.g. gradle -PmainClass=Chapter02)
 def chapterPrefix = 'Chapter0'
 def defaultChapter = '2'
-mainClassName = chapterPrefix + (project.hasProperty('chapter') ? chapter  : defaultChapter)
+//mainClassName = chapterPrefix + (project.hasProperty('chapter') ? chapter  : defaultChapter)

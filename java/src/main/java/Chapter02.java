@@ -382,6 +382,7 @@ public class Chapter02 {
 
         Inventory row = Inventory.get(rowId);
         conn.zadd("schedule:", now + delay, rowId);
+        System.out.println("cache "+rowId+" "+(now+delay));
         conn.set("inv:" + rowId, gson.toJson(row));
       }
     }
