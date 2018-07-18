@@ -4,3 +4,9 @@ GeoLiteCity-*.csv
 .idea
 *.iml
 node_modules
+
+java/RedisInAction-error\.log
+
+java/RedisInAction\.log
+
+java/RedisInAction\.txt

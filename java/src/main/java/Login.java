@@ -117,7 +117,7 @@ public class Login {
       if(key.endsWith("6")) redis.zadd("self-delay:",-1,key);
     });
     sleep(10*1000);
-    logger.debug("all cached items:");
+    logger.debug("all cached items:====>");
     dispAllCached(redis);
     ((ReadyCacheRunnable) runnable).quit();
   }
@@ -127,6 +127,7 @@ public class Login {
       String val=redis.get("self-cache-"+key);
       logger.debug(val);
     }
+    logger.debug("<====");
   }
   static class ReadyCacheRunnable implements Runnable{
     Jedis redis;
@@ -140,10 +141,16 @@ public class Login {
       Gson gson=new Gson();
       while(!quit){
         //logger.debug(""+redis.zcard("self-schedule:"));
+        //self-schedule:中的第一个不满足delay删除条件项会被缓存、score增加，增加后zset重新排序，
+        //排序后第一个是新的，这样不断重新排序，总会发现delay<0的项，也就会被删除。没有追求立即发现被删项
+        // 删除缓存的依据只是delay，如果不为零，self-schedule:中的score会不断增加。
+        // 开始以为会根据这个score来判断是否到期，不是这个score
+        dispScheduleAndDelay(redis);
+
         Set<Tuple> datas=redis.zrangeWithScores("self-schedule:",0,0);
         Tuple data=datas.size()>0?datas.iterator().next():null;
         long now=System.currentTimeMillis()/1000;
-        if(data!=null) logger.debug("{}-score-{},now-{}",data.getElement(),data.getScore(),now);
+        if(data!=null) logger.debug("Test if del:{}.score:{}>now:{}",data.getElement(),data.getScore(),now);
         if(data==null||data.getScore()>now){
           try {
             sleep(50);
@@ -154,6 +161,7 @@ public class Login {
         }
         String rowId=data.getElement();
         double delay=redis.zscore("self-delay:",rowId);
+
         if(delay>0){
           redis.zincrby("self-schedule:",delay,rowId);
           show(redis,rowId);
@@ -169,12 +177,29 @@ public class Login {
       }
     }
   }
+  private static void dispScheduleAndDelay(Jedis redis){
+    logger.debug("--->schedule&delay all in");
+    Set<Tuple> datas=redis.zrangeWithScores("self-schedule:",0,-1);
+    datas.forEach(it-> {
+          String key=it.getElement();
+          double delay=redis.zscore("self-delay:",key);
+          logger.debug("{}.{}.{}", key, it.getScore(),delay);
+        }
+    );
+    logger.debug("<----");
+  }
+  private static void dispZset(Jedis redis,String key){
+    logger.debug("--->all in {}",key);
+    Set<Tuple> datas=redis.zrangeWithScores(key,0,-1);
+    datas.forEach(it->logger.debug("{},{}",it.getElement(),it.getScore()));
+    logger.debug("<----");
+  }
   private static Stu newStu(String rowId){
     long id=Long.parseLong(rowId.split("\\-")[1]);
     return new Stu(id,rowId,90+id,80+id,70+id);
   }
   private static void show(Jedis redis,String rowId){
     double score=redis.zscore("self-schedule:",rowId);
-    logger.info("cache {} is {}",rowId,score);
+    logger.info("cache: {} is {}",rowId,score);
   }
 }
