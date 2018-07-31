@@ -18,7 +18,7 @@ public class Chapter02 {
     testLoginCookies(conn);
     testShopppingCartCookies(conn);
     testCacheRows(conn);
-    //testCacheRequest(conn);
+    testCacheRequest(conn);
   }
 
   public void testLoginCookies(Jedis conn) throws InterruptedException {
@@ -138,12 +138,15 @@ public class Chapter02 {
     System.out.println("\n----- testCacheRequest -----");
     String token = UUID.randomUUID().toString();
 
+    //用来取request对应的内容，这里进行了简化
     Callback callback = new Callback() {
       public String call(String request) {
         return "content for " + request;
       }
     };
 
+    //保存登录信息(hash login:)、最后登录时间(zset recent: timestamp)
+    //浏览历史记录(zset viewed:token timestamp)、(zset,viewed:中减1)
     updateToken(conn, token, "username", "itemX");
     String url = "http://test.com/?item=itemX";
     System.out.println("We are going to cache a simple request against " + url);
@@ -197,24 +200,26 @@ public class Chapter02 {
   }
 
   public String cacheRequest(Jedis conn, String request, Callback callback) {
-    if (!canCache(conn, request)) {
+    if (!canCache(conn, request)) { //不能缓存，callback中提供的内容。
       return callback != null ? callback.call(request) : null;
     }
 
-    String pageKey = "cache:" + hashRequest(request);
-    String content = conn.get(pageKey);
-
+    //判断缓存中有没有cache:+request.hashCode()，以此判断是否缓存过
+    String pageKey = "cache:" + toKey(request);
+    String content = conn.get(pageKey);//从缓存中取下试试
+    //没有缓存过
     if (content == null && callback != null) {
-      content = callback.call(request);
-      conn.setex(pageKey, 300, content);
+      content = callback.call(request);//取内容
+      conn.setex(pageKey, 300, content);//缓存
+      return content;
     }
-
     return content;
   }
 
   public boolean canCache(Jedis conn, String request) {
     try {
       URL url = new URL(request);
+      //得到查询参数
       HashMap<String, String> params = new HashMap<String, String>();
       if (url.getQuery() != null) {
         for (String param : url.getQuery().split("&")) {
@@ -228,6 +233,7 @@ public class Chapter02 {
         return false;
       }
       Long rank = conn.zrank("viewed:", itemId);
+      logger.debug("itemId {} rank:{}",itemId,rank);
       return rank != null && rank < 10000;
     } catch (MalformedURLException mue) {
       return false;
@@ -242,7 +248,7 @@ public class Chapter02 {
     return params.get("item");
   }
 
-  public String hashRequest(String request) {
+  public String toKey(String request) {
     return String.valueOf(request.hashCode());
   }
 
