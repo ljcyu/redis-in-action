@@ -1,4 +1,5 @@
 import com.google.gson.Gson;
+import org.slf4j.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Tuple;
 
@@ -7,6 +8,7 @@ import java.net.URL;
 import java.util.*;
 
 public class Chapter02 {
+  public static final Logger logger=LoggerFactory.getLogger(Chapter02.class);
   public static final void main(String[] args) throws InterruptedException {
     new Chapter02().run();
   }
@@ -215,7 +217,7 @@ public class Chapter02 {
     }
     return content;
   }
-
+  /**判断是否能缓存，这种逻辑不用深究，简单看看就行*/
   public boolean canCache(Jedis conn, String request) {
     try {
       URL url = new URL(request);
@@ -232,6 +234,7 @@ public class Chapter02 {
       if (itemId == null || isDynamic(params)) {
         return false;
       }
+      //zrank，在zset中的排名，从0开始，按照score从低到高
       Long rank = conn.zrank("viewed:", itemId);
       logger.debug("itemId {} rank:{}",itemId,rank);
       return rank != null && rank < 10000;
