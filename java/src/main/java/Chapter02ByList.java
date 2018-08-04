@@ -7,11 +7,19 @@ import redis.clients.jedis.Tuple;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-
-public class Chapter02 {
-  public static final Logger logger= LoggerFactory.getLogger(Chapter02.class);
+/**
+ * redis in action第三章要求
+ * including these timestamps takes space,
+ * and if timestamps aren’t necessary for our analytics,
+ * then using a ZSET just wastes space.
+ * Try to replace the use of ZSETs in update_token() with LISTs,
+ * while keeping the same semantics
+ * 基本上只改变了updateToken这个方法
+ * */
+public class Chapter02ByList {
+  public static final Logger logger= LoggerFactory.getLogger(Chapter02ByList.class);
   public static final void main(String[] args) throws InterruptedException {
-    new Chapter02().run();
+    new Chapter02ByList().run();
   }
 
   public void run() throws InterruptedException {
@@ -149,7 +157,7 @@ public class Chapter02 {
     };
 
     //保存登录信息(hash login:)、最后登录时间(zset recent: timestamp)
-    //浏览历史记录(zset viewed:token timestamp)、(zset,viewed:中减1)
+    //浏览历史记录(list viewed:token)、(zset,viewed:中减1)
     updateToken(conn, token, "username", "itemX");
     String url = "http://test.com/?item=itemX";
     System.out.println("We are going to cache a simple request against " + url);
@@ -180,10 +188,10 @@ public class Chapter02 {
     //最后登录时间,zset
     conn.zadd("recent:", timestamp, token);
     if (item != null) {
-      //浏览的商品信息，浏览历史记录
-      conn.zadd("viewed:" + token, timestamp, item);
+      //浏览的商品信息，浏览历史记录，更改为list
+      conn.lpush("viewed:"+token,item);
       //前边浏览历史删掉，只留最新的25个
-      conn.zremrangeByRank("viewed:" + token, 0, -26);
+      conn.ltrim("viewed:"+token,0,-26);
       //这个表什么用？
       conn.zincrby("viewed:", -1, item);
     }
