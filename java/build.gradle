@@ -5,7 +5,6 @@ version = '1.1'
 
 repositories {
     jcenter()
-
     flatDir {
         dirs 'libs'
     }
@@ -13,7 +12,7 @@ repositories {
 
 dependencies {
 
-    compile 'redis.clients:jedis:2.1.0'
+    compile 'redis.clients:jedis:2.9.0'
     compile 'org.javatuples:javatuples:1.2'
     compile 'com.google.code.gson:gson:2.2.2'
 
@@ -21,8 +20,13 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.10.0'
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.10.0'
 
+    //compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '2.0.4.RELEASE'
+    //compile group: 'org.springframework', name: 'spring-beans', version: '5.0.8.RELEASE'
+    //compile group: 'org.springframework', name: 'spring-core', version: '5.0.8.RELEASE'
+    compile group: 'org.springframework.data', name: 'spring-data-redis', version: '2.0.9.RELEASE'
+    compile group: 'org.apache.commons', name: 'commons-pool2', version: '2.4.2'
 }
-mainClassName="TransDemo";//"MQ";//"Chapter02ByList"//"Login";//"ScoreMIS"
+mainClassName="spring.SpringRedisDemo";//"TransDemo";//"MQ";//"Chapter02ByList"//"Login";//"ScoreMIS"
 //set the main class from the command line property 'mainClass' (e.g. gradle -PmainClass=Chapter02)
 def chapterPrefix = 'Chapter0'
 def defaultChapter = '2'
