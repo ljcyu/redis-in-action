@@ -32,5 +32,6 @@
 		<Root level="info">
 			<appenderRef ref="console" />
 		</Root>
+		<logger name="spring" level="debug" additivity="true"/>
 	</Loggers>
 </configuration>

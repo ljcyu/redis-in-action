@@ -26,7 +26,7 @@ dependencies {
     compile group: 'org.springframework.data', name: 'spring-data-redis', version: '2.0.9.RELEASE'
     compile group: 'org.apache.commons', name: 'commons-pool2', version: '2.4.2'
 }
-mainClassName="spring.SpringRedisDemo";//"TransDemo";//"MQ";//"Chapter02ByList"//"Login";//"ScoreMIS"
+mainClassName="spring.base.SpringRedisDemo";//"TransDemo";//"MQ";//"Chapter02ByList"//"Login";//"ScoreMIS"
 //set the main class from the command line property 'mainClass' (e.g. gradle -PmainClass=Chapter02)
 def chapterPrefix = 'Chapter0'
 def defaultChapter = '2'

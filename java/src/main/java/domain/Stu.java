@@ -1,4 +1,8 @@
-public class Stu {
+package domain;
+
+import java.io.Serializable;
+
+public class Stu implements Serializable {
   long id;
   String username;
   double java,os,math;
@@ -54,7 +58,7 @@ public class Stu {
 
   @Override
   public String toString() {
-    return "Stu{" +
+    return "domain.Stu{" +
         "id=" + id +
         ", username='" + username + '\'' +
         ", java=" + java +

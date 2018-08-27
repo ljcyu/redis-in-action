@@ -1,4 +1,5 @@
 import com.google.gson.Gson;
+import domain.Stu;
 import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Field;
