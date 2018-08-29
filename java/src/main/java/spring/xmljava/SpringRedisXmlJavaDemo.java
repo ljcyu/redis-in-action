@@ -27,6 +27,7 @@ public class SpringRedisXmlJavaDemo {
         ApplicationContext ctx=new ClassPathXmlApplicationContext("classpath:spring-redis-xmljava.xml");
         SpringRedisXmlJavaDemo demo=ctx.getBean("xmlJavaDemo", SpringRedisXmlJavaDemo.class);
         //demo.test();
+        logger.debug("file.encoding:{}",System.getProperty("file.encoding"));
         logger.debug("first getAllStus");
         logger.debug(""+demo.getAllStus());
         logger.debug("second getAllStus");

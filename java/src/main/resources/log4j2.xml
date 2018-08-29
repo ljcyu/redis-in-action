@@ -10,7 +10,7 @@
 		<Console name="console" target="SYSTEM_OUT">
 			<PatternLayout pattern="${pattern}" />
 		</Console>
-		<File name="file" fileName="${log.home}/${prj.name}.log" append="false">
+		<File name="file" fileName="${log.home}/${prj.name}.log" append="true">
 			<PatternLayout pattern="${pattern}" />
 		</File>
 		<File name="error" fileName="${log.home}/${prj.name}-error.log" append="false">
@@ -31,6 +31,7 @@
 	<Loggers>
 		<Root level="info">
 			<appenderRef ref="console" />
+			<appenderRef ref="file" />
 		</Root>
 		<logger name="spring" level="debug" additivity="true"/>
 	</Loggers>

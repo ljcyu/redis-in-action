@@ -19,6 +19,9 @@ dependencies {
     compile name: 'commons-csv-20070730'
     compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.10.0'
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.10.0'
+    //async logger -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+    compile group: 'com.lmax', name: 'disruptor', version: '3.3.7'
+
 
     //compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '2.0.4.RELEASE'
     //compile group: 'org.springframework', name: 'spring-beans', version: '5.0.8.RELEASE'
@@ -28,7 +31,7 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 
 }
-mainClassName="spring.base.SpringRedisDemo";//"TransDemo";//"MQ";//"Chapter02ByList"//"Login";//"ScoreMIS"
+//mainClassName="spring.base.SpringRedisDemo";//"TransDemo";//"MQ";//"Chapter02ByList"//"Login";//"ScoreMIS"
 mainClassName="spring.xmljava.SpringRedisXmlJavaDemo";
 //set the main class from the command line property 'mainClass' (e.g. gradle -PmainClass=Chapter02)
 def chapterPrefix = 'Chapter0'

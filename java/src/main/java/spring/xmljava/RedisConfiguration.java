@@ -14,6 +14,8 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.time.Duration;
+
 @Configuration
 @EnableCaching
 public class RedisConfiguration{
@@ -31,18 +33,21 @@ public class RedisConfiguration{
       RedisTemplate redisTemplate=new RedisTemplate();
       redisTemplate.setConnectionFactory(jedisConnFactory());
       Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<Object>(Object.class);
+      //这几个必须同时设置，不然不会json存
       redisTemplate.setKeySerializer(new StringRedisSerializer());
       redisTemplate.setValueSerializer(serializer);
       redisTemplate.setHashKeySerializer(new StringRedisSerializer());
       redisTemplate.setHashValueSerializer(serializer);
       redisTemplate.afterPropertiesSet();
-      return redisTemplate;  }
+      return redisTemplate;
+    }
 
     @Bean
     public RedisCacheManager cacheManager() {
         RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(jedisConnFactory());
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisTemplate().getValueSerializer()));
+        redisCacheConfiguration.entryTtl(Duration.ofSeconds(120));
         return new RedisCacheManager(redisCacheWriter, redisCacheConfiguration);
     }
   @Bean
