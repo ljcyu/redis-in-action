@@ -45,7 +45,8 @@ public class SpringRedisXmlJavaDemo {
         System.out.println(res);
     }
 
-    @Cacheable("getAllStus-xmljava")
+    //key中是spring el，会运算，所以要这样用。
+    @Cacheable(value="stus-xmljava",key="'allStus'")
     public List<Stu> getAllStus() {
         List<Stu> stus = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -56,6 +57,6 @@ public class SpringRedisXmlJavaDemo {
         logger.debug("自己组装");
         return stus;
     }
-    @CacheEvict("getAllStus-xmljava")
+    @CacheEvict(value="stus-xmljava",key="'allStus'")
     public void newStu(){}
 }

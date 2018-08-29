@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-/**Ä£ÄâÊÂÎñ*/
+/**æ¨¡æ‹Ÿäº‹åŠ¡*/
 public class TransDemo {
     public static void main(String[] args) throws Exception{
         //noTrans();
@@ -41,9 +41,9 @@ public class TransDemo {
         }
         executorService.shutdown();
         while (!executorService.awaitTermination(100, TimeUnit.MILLISECONDS)) {
-            System.out.println("Ïß³Ì³ØÃ»ÓĞ¹Ø±Õ");
+            System.out.println("çº¿ç¨‹æ± æ²¡æœ‰å…³é—­");
         }
-        System.out.println("Ïß³Ì³ØÒÑ¾­¹Ø±Õ");
+        System.out.println("çº¿ç¨‹æ± å·²ç»å…³é—­");
     }
 
     private static void noTrans() throws InterruptedException {
@@ -89,7 +89,7 @@ public class TransDemo {
         resList.forEach(System.out::println);
         redis.disconnect();
     }
-    //Í¬Ê±Á¬½Ó¶à¸öÖ÷»ú
+    //åŒæ—¶è¿æ¥å¤šä¸ªä¸»æœº
     public void multiJedisShardTest() {
         List<JedisShardInfo> shards = Arrays.asList(new JedisShardInfo("localhost", 6379),
                 new JedisShardInfo("localhost", 6380));
@@ -99,7 +99,7 @@ public class TransDemo {
         }
         sharding.disconnect();
     }
-    //Í¬Ê±Á¬½Ó¶à¸öÖ÷»ú,pipeline·½Ê½Ö´ĞĞ
+    //åŒæ—¶è¿æ¥å¤šä¸ªä¸»æœº,pipelineæ–¹å¼æ‰§è¡Œ
     public void multiJedisShardPipeLineTest() {
         List<JedisShardInfo> shards = Arrays.asList(new JedisShardInfo("localhost", 6379),
                 new JedisShardInfo("localhost", 6380));
@@ -112,7 +112,7 @@ public class TransDemo {
         resList.forEach(System.out::println);
         sharding.disconnect();
     }
-    //Ïß³Ì³Ø·½Ê½Í¬Ê±Á¬½Ó¶à¸öÖ÷»ú
+    //çº¿ç¨‹æ± æ–¹å¼åŒæ—¶è¿æ¥å¤šä¸ªä¸»æœº
     public void multiJedisShardThreadTest() {
         List<JedisShardInfo> shards = Arrays.asList(new JedisShardInfo("localhost", 6379),
                 new JedisShardInfo("localhost", 6380));
@@ -123,7 +123,7 @@ public class TransDemo {
         }
         pool.destroy();
     }
-    //Í¬Ê±Á¬½Ó¶à¸öÖ÷»ú,pipeline·½Ê½Ö´ĞĞ
+    //åŒæ—¶è¿æ¥å¤šä¸ªä¸»æœº,pipelineæ–¹å¼æ‰§è¡Œ
     public void multiJedisShardPipeLineThreadTest() {
         List<JedisShardInfo> shards = Arrays.asList(new JedisShardInfo("localhost", 6379),
                 new JedisShardInfo("localhost", 6380));
