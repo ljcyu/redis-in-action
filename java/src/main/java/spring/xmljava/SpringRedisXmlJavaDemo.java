@@ -36,7 +36,7 @@ public class SpringRedisXmlJavaDemo {
         demo.newStu();
         logger.debug("third getAllStus");
         logger.debug(""+demo.getAllStus());
-        demo.testKeyGenerator();
+        logger.debug(""+demo.testKeyGenerator3());
         ((ClassPathXmlApplicationContext) ctx).registerShutdownHook();
     }
     public void test(){
@@ -46,7 +46,7 @@ public class SpringRedisXmlJavaDemo {
     }
     //试试KeyGenerator产生的Key
     @Cacheable(value="stus-xmljava")
-    public List<Stu> testKeyGenerator() {
+    public List<Stu> testKeyGenerator3() {
         List<Stu> stus = new ArrayList<>();
         Stu stu = new Stu(2, "testKeyGenerator", 80, 80, 80);
         stus.add(stu);

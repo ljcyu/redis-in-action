@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 
 @Configuration
-@EnableCaching
+//@EnableCaching
 public class RedisConfiguration{
     public static final Logger logger= LoggerFactory.getLogger(RedisConfiguration.class);
     @Bean
