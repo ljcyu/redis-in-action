@@ -36,13 +36,22 @@ public class SpringRedisXmlJavaDemo {
         demo.newStu();
         logger.debug("third getAllStus");
         logger.debug(""+demo.getAllStus());
-
+        demo.testKeyGenerator();
         ((ClassPathXmlApplicationContext) ctx).registerShutdownHook();
     }
     public void test(){
         stringRedisTemplate.opsForValue().set("hello:","test2");
         String res=stringRedisTemplate.opsForValue().get("hello:");
         System.out.println(res);
+    }
+    //试试KeyGenerator产生的Key
+    @Cacheable(value="stus-xmljava")
+    public List<Stu> testKeyGenerator() {
+        List<Stu> stus = new ArrayList<>();
+        Stu stu = new Stu(2, "testKeyGenerator", 80, 80, 80);
+        stus.add(stu);
+        logger.debug("测试KeyGenerator");
+        return stus;
     }
 
     //key中是spring el，会运算，所以要这样用。

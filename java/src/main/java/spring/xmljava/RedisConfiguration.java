@@ -1,5 +1,7 @@
 package spring.xmljava;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +23,9 @@ import java.time.Duration;
 @Configuration
 @EnableCaching
 public class RedisConfiguration{
+    public static final Logger logger= LoggerFactory.getLogger(RedisConfiguration.class);
     @Bean
-    public KeyGenerator simpleKeyGenerator() {
+    public KeyGenerator selfKeyGenerator() {
         return (Object obj, Method method, Object[] args) -> {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(obj.getClass().getSimpleName());
@@ -33,7 +36,7 @@ public class RedisConfiguration{
                 stringBuilder.append(arg.toString());
             }
             stringBuilder.append("]");
-
+            logger.debug("keyGenerator:{}",stringBuilder.toString());
             return stringBuilder.toString();
         };
     }
