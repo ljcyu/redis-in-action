@@ -8,10 +8,10 @@
 	</properties>
 	<Appenders>
 		<Console name="console" target="SYSTEM_OUT">
-			<PatternLayout pattern="${pattern}" />
+			<PatternLayout pattern="${pattern}"/>
 		</Console>
 		<File name="file" fileName="${log.home}/${prj.name}.log" append="true">
-			<PatternLayout pattern="${pattern}" />
+			<PatternLayout pattern="${pattern}"/>
 		</File>
 		<File name="error" fileName="${log.home}/${prj.name}-error.log" append="false">
 			<ThresholdFilter level="error" onMatch="ACCEPT"
