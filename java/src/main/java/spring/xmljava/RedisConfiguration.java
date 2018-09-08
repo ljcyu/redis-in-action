@@ -2,6 +2,7 @@ package spring.xmljava;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,9 +22,15 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 
 @Configuration
-//@EnableCaching
-public class RedisConfiguration{
+@EnableCaching
+public class RedisConfiguration extends CachingConfigurerSupport {
     public static final Logger logger= LoggerFactory.getLogger(RedisConfiguration.class);
+
+    @Override
+    public KeyGenerator keyGenerator() {
+        return selfKeyGenerator();
+    }
+
     @Bean
     public KeyGenerator selfKeyGenerator() {
         return (Object obj, Method method, Object[] args) -> {
